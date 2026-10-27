@@ -35,6 +35,7 @@
     .nav span{display:block;font-size:19px;margin-bottom:4px}.view{display:none}.view.active{display:block}
     .empty{color:var(--muted);font-size:14px;padding:10px 0}.danger{color:var(--red)}.hint{font-size:12px;line-height:1.5;color:var(--muted);margin-top:12px}
     .moneyInput{width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px}
+    input,select,textarea{font:inherit;color:var(--text)} select option{background:var(--panel2)} .fieldLabel{display:block;color:var(--muted);font-size:12px;margin:12px 0 5px}.calendarHead{display:flex;align-items:center;justify-content:space-between;gap:8px}.monthTitle{font-weight:750;font-size:16px}.calendarGrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin-top:14px}.weekday{text-align:center;color:var(--muted);font-size:11px;padding:5px 0}.dayCell{min-height:42px;border:1px solid transparent;border-radius:11px;background:var(--panel2);color:var(--text);padding:7px 0 4px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;font-size:13px}.dayCell.dim{opacity:.35}.dayCell.selected{border-color:var(--accent);background:#293322}.dayCell.todayDay{color:var(--accent)}.dots{height:4px;display:flex;gap:3px}.dot{width:4px;height:4px;border-radius:50%;background:var(--accent)}.formGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.formGrid input{min-width:0}.timelineItem{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}.timelineItem:last-child{border-bottom:0}.timeCol{width:48px;flex:0 0 48px;color:var(--accent);font-weight:750;font-size:13px}.eventTag{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--muted);margin-bottom:4px}.eventBody{flex:1;min-width:0}.eventBody strong{overflow-wrap:anywhere}.eventDesc{font-size:13px;color:var(--muted);margin-top:4px;white-space:pre-wrap}.formArea{width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px;resize:vertical}.daySwitch{display:flex;gap:8px;align-items:center}.daySwitch strong{flex:1;text-align:center}
     @media(min-width:500px){body{padding-top:24px}.big{font-size:32px}}
   </style>
 </head>
@@ -51,6 +52,7 @@
       <div class="row"><div><div class="label">Dzisiejszy postęp</div><div class="big" id="progressText">0% wykonania</div></div><div class="pill" id="taskCount">0 zadań</div></div>
       <div class="progress"><div class="bar" id="progressBar"></div></div>
     </div>
+    <div class="sectionTitle">Plan na dziś</div><div class="card" id="homeSchedule"></div><button class="smallBtn" id="openCalendar" style="width:100%;margin-top:10px">Otwórz kalendarz i plan dnia →</button>
     <div class="sectionTitle">Najważniejsze zadania</div>
     <div class="card" id="homeTasks"></div>
     <div class="sectionTitle">Nawyki na dziś</div>
@@ -61,6 +63,31 @@
       <div class="stat"><div class="label">Dodane transakcje</div><div class="value" id="homeTransactions">0</div></div>
     </div>
     <div class="hint">To wersja startowa. Dane są zapisywane lokalnie w tej przeglądarce na tym urządzeniu.</div>
+  </section>
+
+  <section id="calendar" class="view">
+    <h1>Kalendarz</h1><div class="sub">Zaplanuj czas, nie tylko listę zadań.</div>
+    <div class="card">
+      <div class="calendarHead"><button class="smallBtn" id="prevMonth">‹</button><div class="monthTitle" id="monthTitle"></div><button class="smallBtn" id="nextMonth">›</button></div>
+      <div class="calendarGrid" id="calendarGrid"></div>
+      <div class="hint">Kropka oznacza, że danego dnia masz zaplanowane wydarzenie lub zadanie.</div>
+    </div>
+    <div class="sectionTitle">Plan dnia</div>
+    <div class="card">
+      <div class="daySwitch"><button class="smallBtn" id="prevDay">‹</button><strong id="selectedDateLabel"></strong><button class="smallBtn" id="nextDay">›</button></div>
+      <div id="daySchedule" style="margin-top:10px"></div>
+    </div>
+    <div class="sectionTitle">Dodaj wydarzenie</div>
+    <div class="card">
+      <label class="fieldLabel" for="eventTitle">Nazwa wydarzenia</label><input id="eventTitle" class="moneyInput" placeholder="Np. trening na siłowni" maxlength="100">
+      <label class="fieldLabel" for="eventDate">Data</label><input id="eventDate" class="moneyInput" type="date">
+      <div class="formGrid"><div><label class="fieldLabel" for="eventStart">Od</label><input id="eventStart" class="moneyInput" type="time" value="09:00"></div><div><label class="fieldLabel" for="eventEnd">Do</label><input id="eventEnd" class="moneyInput" type="time" value="10:00"></div></div>
+      <label class="fieldLabel" for="eventDescription">Opis (opcjonalnie)</label><textarea id="eventDescription" class="formArea" rows="2" placeholder="Miejsce, przygotowanie, notatki..."></textarea>
+      <button class="primary" id="addEvent" style="width:100%;margin-top:12px">Dodaj do kalendarza</button>
+    </div>
+    <div class="sectionTitle">Dodaj zadanie do dnia</div>
+    <div class="card"><input id="datedTaskInput" class="moneyInput" placeholder="Np. powtórzyć matematykę" maxlength="120"><div class="formGrid"><div><label class="fieldLabel" for="taskDate">Data</label><input id="taskDate" class="moneyInput" type="date"></div><div><label class="fieldLabel" for="taskTime">Godzina (opcjonalnie)</label><input id="taskTime" class="moneyInput" type="time"></div></div><button class="primary" id="addDatedTask" style="width:100%;margin-top:12px">Dodaj zadanie</button></div>
+    <div class="hint">Wydarzenia i zadania są zapisywane lokalnie na tym urządzeniu. Nie synchronizują się jeszcze z Kalendarzem Apple.</div>
   </section>
 
   <section id="tasks" class="view">
@@ -110,6 +137,7 @@
 
 <nav class="nav"><div class="navInner">
   <button class="active" data-view="home"><span>⌂</span>Dzisiaj</button>
+  <button data-view="calendar"><span>▦</span>Kalendarz</button>
   <button data-view="tasks"><span>☷</span>Zadania</button>
   <button data-view="habits"><span>✓</span>Nawyki</button>
   <button data-view="finance"><span>↗</span>Finanse</button>
@@ -117,11 +145,14 @@
 </div></nav>
 <script>
 const $=id=>document.getElementById(id);
-const todayKey=()=>new Date().toISOString().slice(0,10);
+const dateKey=(d=new Date())=>{const x=new Date(d);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+const todayKey=()=>dateKey();
+let selectedDate=todayKey(), calendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);
 const money=n=>new Intl.NumberFormat('pl-PL',{style:'currency',currency:'PLN',maximumFractionDigits:2}).format(n);
-const initial=()=>({tasks:[{id:1,text:'Ułożyć plan dnia',done:false},{id:2,text:'Zrobić trening',done:false}],habits:[{id:1,text:'Wypić odpowiednią ilość wody',done:false},{id:2,text:'10 minut rozciągania',done:false}],transactions:[]});
+const initial=()=>({tasks:[{id:1,text:'Ułożyć plan dnia',done:false,date:todayKey(),time:''},{id:2,text:'Zrobić trening',done:false,date:todayKey(),time:''}],habits:[{id:1,text:'Wypić odpowiednią ilość wody',done:false},{id:2,text:'10 minut rozciągania',done:false}],transactions:[],events:[]});
 let state;
 try{state=JSON.parse(localStorage.getItem('lifeos-v1'))||initial()}catch(e){state=initial()}
+state.events=Array.isArray(state.events)?state.events:[];state.tasks=state.tasks||[];state.transactions=state.transactions||[];state.habits=state.habits||[];state.tasks.forEach(t=>{if(!t.date)t.date=todayKey();if(!t.time)t.time=''});
 function save(){localStorage.setItem('lifeos-v1',JSON.stringify(state));render()}
 function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function listHTML(items,type){if(!items.length)return '<div class="empty">Na razie pusto. Dodaj pierwszy element powyżej.</div>';return items.map(x=>`<div class="item"><button class="check ${x.done?'done':''}" data-toggle="${type}" data-id="${x.id}">${x.done?'✓':''}</button><div class="itemText ${x.done?'doneText':''}">${escapeHTML(x.text)}</div><button class="smallBtn danger" data-delete="${type}" data-id="${x.id}">Usuń</button></div>`).join('')}
@@ -129,7 +160,8 @@ function render(){
   $('today').textContent=new Intl.DateTimeFormat('pl-PL',{weekday:'long',day:'numeric',month:'long'}).format(new Date());
   const done=state.tasks.filter(x=>x.done).length, total=state.tasks.length, pct=total?Math.round(done/total*100):0;
   $('progressText').textContent=pct+'% wykonania';$('progressBar').style.width=pct+'%';$('taskCount').textContent=`${done} z ${total} zadań`;
-  $('homeTasks').innerHTML=listHTML(state.tasks.slice(0,4),'tasks');$('allTasks').innerHTML=listHTML(state.tasks,'tasks');
+  $('homeTasks').innerHTML=listHTML(state.tasks.filter(t=>t.date===todayKey()).slice(0,4),'tasks');$('allTasks').innerHTML=listHTML(state.tasks,'tasks');
+  renderCalendar();renderSchedule(todayKey(),'homeSchedule',true);
   $('homeHabits').innerHTML=listHTML(state.habits,'habits');$('allHabits').innerHTML=listHTML(state.habits,'habits');
   const month=new Date().toISOString().slice(0,7);
   const tx=state.transactions.filter(t=>t.date.startsWith(month));
@@ -140,18 +172,40 @@ function render(){
 }
 document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.querySelectorAll('[data-view]').forEach(x=>x.classList.remove('active'));$(b.dataset.view).classList.add('active');b.classList.add('active')}));
 document.addEventListener('click',e=>{const t=e.target.closest('[data-toggle]');if(t){const arr=state[t.dataset.toggle],x=arr.find(a=>a.id==t.dataset.id);if(x)x.done=!x.done;save()}const d=e.target.closest('[data-delete]');if(d){state[d.dataset.delete]=state[d.dataset.delete].filter(x=>x.id!=d.dataset.id);save()}});
-$('addTask').onclick=()=>{const text=$('taskInput').value.trim();if(!text)return;state.tasks.push({id:Date.now(),text,done:false});$('taskInput').value='';save()};
+$('addTask').onclick=()=>{const text=$('taskInput').value.trim();if(!text)return;state.tasks.push({id:Date.now(),text,done:false,date:todayKey(),time:''});$('taskInput').value='';save()};
 $('taskInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('addTask').click()});
 $('addHabit').onclick=()=>{const text=$('habitInput').value.trim();if(!text)return;state.habits.push({id:Date.now(),text,done:false});$('habitInput').value='';save()};
 $('habitInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('addHabit').click()});
 $('addTx').onclick=()=>{const amount=Number($('txAmount').value),category=$('txCategory').value.trim();if(!(amount>0)||!category){alert('Wpisz poprawną kwotę i kategorię.');return}state.transactions.push({id:Date.now(),type:$('txType').value,amount,category,note:$('txNote').value.trim(),date:todayKey()});$('txAmount').value='';$('txCategory').value='';$('txNote').value='';save()};
+function formatDate(key,opts={weekday:'long',day:'numeric',month:'long'}){const [y,m,d]=key.split('-').map(Number);return new Intl.DateTimeFormat('pl-PL',opts).format(new Date(y,m-1,d))}
+function renderCalendar(){
+  $('monthTitle').textContent=new Intl.DateTimeFormat('pl-PL',{month:'long',year:'numeric'}).format(calendarMonth);
+  $('selectedDateLabel').textContent=formatDate(selectedDate);
+  $('eventDate').value=selectedDate;$('taskDate').value=selectedDate;
+  const year=calendarMonth.getFullYear(),month=calendarMonth.getMonth(),first=new Date(year,month,1),start=(first.getDay()+6)%7,days=new Date(year,month+1,0).getDate(),prevDays=new Date(year,month,0).getDate();
+  const html=['Pn','Wt','Śr','Cz','Pt','Sb','Nd'].map(x=>`<div class="weekday">${x}</div>`).join('');let cells='';
+  for(let i=0;i<42;i++){let n=i-start+1,dt,dim=false;if(n<1){dt=new Date(year,month-1,prevDays+n);dim=true}else if(n>days){dt=new Date(year,month+1,n-days);dim=true}else dt=new Date(year,month,n);const key=dateKey(dt),has=state.events.some(e=>e.date===key)||state.tasks.some(t=>t.date===key);cells+=`<button class="dayCell ${dim?'dim':''} ${key===selectedDate?'selected':''} ${key===todayKey()?'todayDay':''}" data-date="${key}">${dt.getDate()}<span class="dots">${has?'<i class="dot"></i>':''}</span></button>`}
+  $('calendarGrid').innerHTML=html+cells;
+}
+function renderSchedule(key,target,compact=false){
+  const ev=state.events.filter(e=>e.date===key).map(e=>({...e,kind:'event',sort:e.start||'99:99'}));
+  const tasks=state.tasks.filter(t=>t.date===key).map(t=>({...t,kind:'task',sort:t.time||'99:99'}));const items=[...ev,...tasks].sort((a,b)=>a.sort.localeCompare(b.sort));
+  if(!items.length){$(target).innerHTML='<div class="empty">Brak planu na ten dzień. Dodaj wydarzenie lub zadanie w kalendarzu.</div>';return}
+  $(target).innerHTML=items.map(x=>`<div class="timelineItem"><div class="timeCol">${x.kind==='event'?escapeHTML(x.start||'—'):(x.time?escapeHTML(x.time):'—')}</div><div class="eventBody"><div class="eventTag">${x.kind==='event'?'Wydarzenie'+(x.end?' · do '+escapeHTML(x.end):''):'Zadanie'}</div><strong style="${x.done?'text-decoration:line-through;color:var(--muted)':''}">${escapeHTML(x.title||x.text)}</strong>${x.description?`<div class="eventDesc">${escapeHTML(x.description)}</div>`:''}</div>${x.kind==='event'?`<button class="smallBtn danger" data-delete="events" data-id="${x.id}">Usuń</button>`:`<button class="check ${x.done?'done':''}" data-toggle="tasks" data-id="${x.id}">${x.done?'✓':''}</button>`}</div>`).join('');
+}
+document.addEventListener('click',e=>{const day=e.target.closest('[data-date]');if(day){selectedDate=day.dataset.date;calendarMonth=new Date(Number(selectedDate.slice(0,4)),Number(selectedDate.slice(5,7))-1,1);renderCalendar();renderSchedule(selectedDate,'daySchedule')} });
+$('prevMonth').onclick=()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()-1,1);renderCalendar()};$('nextMonth').onclick=()=>{calendarMonth=new Date(calendarMonth.getFullYear(),calendarMonth.getMonth()+1,1);renderCalendar()};
+$('prevDay').onclick=()=>{const [y,m,d]=selectedDate.split('-').map(Number);selectedDate=dateKey(new Date(y,m-1,d-1));calendarMonth=new Date(Number(selectedDate.slice(0,4)),Number(selectedDate.slice(5,7))-1,1);renderCalendar();renderSchedule(selectedDate,'daySchedule')};$('nextDay').onclick=()=>{const [y,m,d]=selectedDate.split('-').map(Number);selectedDate=dateKey(new Date(y,m-1,d+1));calendarMonth=new Date(Number(selectedDate.slice(0,4)),Number(selectedDate.slice(5,7))-1,1);renderCalendar();renderSchedule(selectedDate,'daySchedule')};
+$('addEvent').onclick=()=>{const title=$('eventTitle').value.trim(),date=$('eventDate').value,start=$('eventStart').value,end=$('eventEnd').value;if(!title||!date){alert('Wpisz nazwę wydarzenia i datę.');return}if(start&&end&&end<=start){alert('Godzina zakończenia musi być późniejsza niż rozpoczęcia.');return}state.events.push({id:Date.now(),title,date,start,end,description:$('eventDescription').value.trim()});selectedDate=date;calendarMonth=new Date(Number(date.slice(0,4)),Number(date.slice(5,7))-1,1);$('eventTitle').value='';$('eventDescription').value='';save();renderSchedule(selectedDate,'daySchedule')};
+$('addDatedTask').onclick=()=>{const text=$('datedTaskInput').value.trim(),date=$('taskDate').value,time=$('taskTime').value;if(!text||!date){alert('Wpisz treść zadania i datę.');return}state.tasks.push({id:Date.now(),text,date,time,done:false});selectedDate=date;calendarMonth=new Date(Number(date.slice(0,4)),Number(date.slice(5,7))-1,1);$('datedTaskInput').value='';$('taskTime').value='';save();renderSchedule(selectedDate,'daySchedule')};
+$('openCalendar').onclick=()=>{document.querySelector('[data-view="calendar"]').click()};
 function command(raw){const s=raw.trim();if(!s)return 'Wpisz polecenie.';let m=s.match(/dodaj zadanie\s*:\s*(.+)/i);if(m){state.tasks.push({id:Date.now(),text:m[1],done:false});save();return 'Dodano zadanie: '+m[1]}m=s.match(/dodaj wydatek\s+(\d+(?:[.,]\d{1,2})?)\s*zł\s+(.+)/i);if(m){state.transactions.push({id:Date.now(),type:'expense',amount:Number(m[1].replace(',','.')),category:m[2].trim(),note:'Dodano przez asystenta',date:todayKey()});save();return `Dodano wydatek ${m[1]} zł — ${m[2]}.`}if(/pokaż moje zadania/i.test(s))return state.tasks.length?'Twoje zadania: '+state.tasks.map(t=>(t.done?'wykonane: ':'do zrobienia: ')+t.text).join('; '):'Nie masz jeszcze zadań.';return 'Nie rozpoznaję jeszcze tego polecenia. Spróbuj: „Dodaj zadanie: zrobić trening” albo „Dodaj wydatek 25 zł jedzenie”.'}
 $('runAssistant').onclick=()=>{$('assistantReply').textContent=command($('assistantInput').value);$('assistantInput').value=''};
 $('assistantInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('runAssistant').click()});
 $('voiceBtn').onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$('assistantReply').textContent='Ta przeglądarka nie udostępnia rozpoznawania mowy. Użyj wpisywania tekstu lub otwórz aplikację w obsługiwanej przeglądarce.';return}const rec=new SR();rec.lang='pl-PL';rec.interimResults=false;rec.onresult=e=>{const phrase=e.results[0][0].transcript;$('assistantInput').value=phrase;$('assistantReply').textContent=command(phrase)};rec.onerror=()=>{$('assistantReply').textContent='Nie udało się rozpoznać mowy. Sprawdź uprawnienia mikrofonu lub wpisz polecenie.'};rec.start()};
-$('resetBtn').onclick=()=>{if(confirm('Przywrócić dane demonstracyjne? Obecne lokalne dane zostaną zastąpione.')){state=initial();save()}};
+$('resetBtn').onclick=()=>{if(confirm('Przywrócić dane demonstracyjne? Obecne lokalne dane zostaną zastąpione.')){state=initial();selectedDate=todayKey();calendarMonth=new Date(new Date().getFullYear(),new Date().getMonth(),1);save();renderSchedule(selectedDate,'daySchedule')}};
 if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
-render();
+render();renderSchedule(selectedDate,'daySchedule');
 </script>
 </body>
 </html>
