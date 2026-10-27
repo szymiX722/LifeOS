@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#101114">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="LifeOS">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <title>LifeOS</title>
+  <style>
+    :root{color-scheme:dark;--bg:#101114;--panel:#191b21;--panel2:#20232b;--text:#f4f5f7;--muted:#9da3b0;--line:#2b2e37;--accent:#b7f36b;--accentText:#18200e;--red:#ff8e8e}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font:16px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;padding:env(safe-area-inset-top) 16px calc(90px + env(safe-area-inset-bottom));}
+    button,input{font:inherit} button{cursor:pointer}
+    .wrap{max-width:600px;margin:0 auto}.top{display:flex;justify-content:space-between;align-items:center;padding:18px 0 20px}
+    .brand{font-size:13px;letter-spacing:2px;color:var(--accent);font-weight:800}.date{font-size:13px;color:var(--muted);margin-top:5px}
+    h1{font-size:30px;letter-spacing:-1px;margin:8px 0 5px}.sub{color:var(--muted);font-size:14px}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:17px;margin-top:14px}
+    .hero{background:linear-gradient(135deg,#252c20,#191b21 72%);border-color:#3b4930}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px}.label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:1.1px;font-weight:700}
+    .big{font-size:28px;font-weight:750;letter-spacing:-.7px;margin-top:8px}.pill{font-size:12px;background:#30382a;color:var(--accent);border-radius:20px;padding:7px 10px}
+    .progress{height:7px;background:#343740;border-radius:8px;overflow:hidden;margin-top:15px}.bar{height:100%;background:var(--accent);width:0%;transition:width .2s}
+    .sectionTitle{font-size:18px;font-weight:750;margin:25px 2px 8px}.muted{color:var(--muted);font-size:13px}
+    .item{display:flex;align-items:center;gap:11px;padding:12px 0;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0;padding-bottom:0}
+    .check{width:23px;height:23px;flex:0 0 23px;border:1.5px solid #626875;border-radius:8px;background:transparent;color:var(--accent);display:grid;place-items:center;padding:0}
+    .check.done{background:var(--accent);border-color:var(--accent);color:var(--accentText)}.itemText{flex:1;min-width:0}.itemText.doneText{text-decoration:line-through;color:var(--muted)}
+    .smallBtn{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:11px;padding:9px 11px;font-size:13px}
+    .addRow{display:flex;gap:8px;margin-top:12px}.addRow input{flex:1;min-width:0;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px;outline:none}
+    .primary{background:var(--accent);color:var(--accentText);border:0;border-radius:12px;padding:11px 14px;font-weight:750}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.stat{background:var(--panel2);border-radius:14px;padding:13px}.stat .value{font-size:22px;font-weight:750;margin-top:7px}
+    .nav{position:fixed;bottom:0;left:0;right:0;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(16,17,20,.94);backdrop-filter:blur(18px);border-top:1px solid var(--line);display:flex;justify-content:center;z-index:3}
+    .navInner{display:flex;gap:4px;width:100%;max-width:600px}.nav button{flex:1;background:transparent;color:var(--muted);border:0;border-radius:12px;padding:10px 4px;font-size:11px}.nav button.active{background:var(--panel2);color:var(--accent)}
+    .nav span{display:block;font-size:19px;margin-bottom:4px}.view{display:none}.view.active{display:block}
+    .empty{color:var(--muted);font-size:14px;padding:10px 0}.danger{color:var(--red)}.hint{font-size:12px;line-height:1.5;color:var(--muted);margin-top:12px}
+    .moneyInput{width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:12px;padding:12px;margin-top:8px}
+    @media(min-width:500px){body{padding-top:24px}.big{font-size:32px}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div><div class="brand">L I F E O S</div><div class="date" id="today"></div></div>
+    <button class="smallBtn" id="resetBtn" title="Resetuj dane demonstracyjne">↻ Reset</button>
+  </header>
+
+  <section id="home" class="view active">
+    <h1>Twój dzień.</h1><div class="sub">Małe kroki. Konkretny postęp.</div>
+    <div class="card hero">
+      <div class="row"><div><div class="label">Dzisiejszy postęp</div><div class="big" id="progressText">0% wykonania</div></div><div class="pill" id="taskCount">0 zadań</div></div>
+      <div class="progress"><div class="bar" id="progressBar"></div></div>
+    </div>
+    <div class="sectionTitle">Najważniejsze zadania</div>
+    <div class="card" id="homeTasks"></div>
+    <div class="sectionTitle">Nawyki na dziś</div>
+    <div class="card" id="homeHabits"></div>
+    <div class="sectionTitle">Szybki podgląd finansów</div>
+    <div class="grid">
+      <div class="stat"><div class="label">Wydatki w tym miesiącu</div><div class="value" id="homeSpend">0 zł</div></div>
+      <div class="stat"><div class="label">Dodane transakcje</div><div class="value" id="homeTransactions">0</div></div>
+    </div>
+    <div class="hint">To wersja startowa. Dane są zapisywane lokalnie w tej przeglądarce na tym urządzeniu.</div>
+  </section>
+
+  <section id="tasks" class="view">
+    <h1>Zadania</h1><div class="sub">Zapisz, co trzeba zrobić. Odznaczaj po wykonaniu.</div>
+    <div class="addRow"><input id="taskInput" placeholder="Np. pouczyć się matematyki" maxlength="120"><button class="primary" id="addTask">Dodaj</button></div>
+    <div class="card" id="allTasks"></div>
+  </section>
+
+  <section id="habits" class="view">
+    <h1>Nawyki</h1><div class="sub">Buduj regularność, nie perfekcję.</div>
+    <div class="addRow"><input id="habitInput" placeholder="Np. 10 min czytania" maxlength="80"><button class="primary" id="addHabit">Dodaj</button></div>
+    <div class="card" id="allHabits"></div>
+  </section>
+
+  <section id="finance" class="view">
+    <h1>Finanse</h1><div class="sub">Prosty rejestr przychodów i wydatków.</div>
+    <div class="grid" style="margin-top:16px">
+      <div class="stat"><div class="label">Przychody</div><div class="value" id="incomeTotal">0 zł</div></div>
+      <div class="stat"><div class="label">Wydatki</div><div class="value" id="expenseTotal">0 zł</div></div>
+    </div>
+    <div class="card">
+      <div class="label">Nowa transakcja</div>
+      <select id="txType" class="moneyInput"><option value="expense">Wydatek</option><option value="income">Przychód</option></select>
+      <input id="txAmount" class="moneyInput" type="number" min="0.01" step="0.01" placeholder="Kwota w zł">
+      <input id="txCategory" class="moneyInput" placeholder="Kategoria, np. jedzenie">
+      <input id="txNote" class="moneyInput" placeholder="Opis (opcjonalnie)">
+      <button class="primary" id="addTx" style="width:100%;margin-top:12px">Zapisz transakcję</button>
+    </div>
+    <div class="sectionTitle">Ostatnie transakcje</div><div class="card" id="transactions"></div>
+    <div class="hint">Wersja demonstracyjna: bez połączenia z bankiem, bez danych inwestycyjnych i bez synchronizacji między urządzeniami.</div>
+  </section>
+
+  <section id="assistant" class="view">
+    <h1>Asystent</h1><div class="sub">Pierwszy krok do sterowania LifeOS głosem.</div>
+    <div class="card">
+      <div class="label">Wpisz polecenie</div>
+      <div class="addRow"><input id="assistantInput" placeholder="Dodaj zadanie: trening" maxlength="180"><button class="primary" id="runAssistant">Wykonaj</button></div>
+      <button class="smallBtn" id="voiceBtn" style="width:100%;margin-top:10px">🎙️ Mów po polsku</button>
+      <div class="hint">Rozpoznawanie mowy zależy od przeglądarki i uprawnień. Jeśli nie działa, wpisz polecenie tekstowo.</div>
+    </div>
+    <div class="card"><div class="label">Odpowiedź</div><p id="assistantReply" style="line-height:1.5;margin-bottom:0">Czekam na polecenie.</p></div>
+    <div class="sectionTitle">Przykładowe polecenia</div>
+    <div class="card muted">„Dodaj zadanie: zrobić trening”<br><br>„Dodaj wydatek 25 zł jedzenie”<br><br>„Pokaż moje zadania”</div>
+    <div class="hint">Na razie to lokalny prototyp z prostymi komendami, a nie pełny model AI.</div>
+  </section>
+</div>
+
+<nav class="nav"><div class="navInner">
+  <button class="active" data-view="home"><span>⌂</span>Dzisiaj</button>
+  <button data-view="tasks"><span>☷</span>Zadania</button>
+  <button data-view="habits"><span>✓</span>Nawyki</button>
+  <button data-view="finance"><span>↗</span>Finanse</button>
+  <button data-view="assistant"><span>◉</span>Asystent</button>
+</div></nav>
+<script>
+const $=id=>document.getElementById(id);
+const todayKey=()=>new Date().toISOString().slice(0,10);
+const money=n=>new Intl.NumberFormat('pl-PL',{style:'currency',currency:'PLN',maximumFractionDigits:2}).format(n);
+const initial=()=>({tasks:[{id:1,text:'Ułożyć plan dnia',done:false},{id:2,text:'Zrobić trening',done:false}],habits:[{id:1,text:'Wypić odpowiednią ilość wody',done:false},{id:2,text:'10 minut rozciągania',done:false}],transactions:[]});
+let state;
+try{state=JSON.parse(localStorage.getItem('lifeos-v1'))||initial()}catch(e){state=initial()}
+function save(){localStorage.setItem('lifeos-v1',JSON.stringify(state));render()}
+function escapeHTML(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function listHTML(items,type){if(!items.length)return '<div class="empty">Na razie pusto. Dodaj pierwszy element powyżej.</div>';return items.map(x=>`<div class="item"><button class="check ${x.done?'done':''}" data-toggle="${type}" data-id="${x.id}">${x.done?'✓':''}</button><div class="itemText ${x.done?'doneText':''}">${escapeHTML(x.text)}</div><button class="smallBtn danger" data-delete="${type}" data-id="${x.id}">Usuń</button></div>`).join('')}
+function render(){
+  $('today').textContent=new Intl.DateTimeFormat('pl-PL',{weekday:'long',day:'numeric',month:'long'}).format(new Date());
+  const done=state.tasks.filter(x=>x.done).length, total=state.tasks.length, pct=total?Math.round(done/total*100):0;
+  $('progressText').textContent=pct+'% wykonania';$('progressBar').style.width=pct+'%';$('taskCount').textContent=`${done} z ${total} zadań`;
+  $('homeTasks').innerHTML=listHTML(state.tasks.slice(0,4),'tasks');$('allTasks').innerHTML=listHTML(state.tasks,'tasks');
+  $('homeHabits').innerHTML=listHTML(state.habits,'habits');$('allHabits').innerHTML=listHTML(state.habits,'habits');
+  const month=new Date().toISOString().slice(0,7);
+  const tx=state.transactions.filter(t=>t.date.startsWith(month));
+  const exp=tx.filter(t=>t.type==='expense').reduce((a,t)=>a+t.amount,0), inc=tx.filter(t=>t.type==='income').reduce((a,t)=>a+t.amount,0);
+  $('homeSpend').textContent=money(exp);$('homeTransactions').textContent=tx.length;
+  $('incomeTotal').textContent=money(inc);$('expenseTotal').textContent=money(exp);
+  $('transactions').innerHTML=state.transactions.length?state.transactions.slice().reverse().slice(0,20).map(t=>`<div class="item"><div class="itemText"><strong>${escapeHTML(t.category)}</strong><div class="muted">${escapeHTML(t.note||t.date)} · ${t.date}</div></div><strong class="${t.type==='expense'?'danger':''}">${t.type==='expense'?'−':'+'}${money(t.amount)}</strong><button class="smallBtn danger" data-delete="transactions" data-id="${t.id}">×</button></div>`).join(''):'<div class="empty">Nie dodano jeszcze transakcji.</div>';
+}
+document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));document.querySelectorAll('[data-view]').forEach(x=>x.classList.remove('active'));$(b.dataset.view).classList.add('active');b.classList.add('active')}));
+document.addEventListener('click',e=>{const t=e.target.closest('[data-toggle]');if(t){const arr=state[t.dataset.toggle],x=arr.find(a=>a.id==t.dataset.id);if(x)x.done=!x.done;save()}const d=e.target.closest('[data-delete]');if(d){state[d.dataset.delete]=state[d.dataset.delete].filter(x=>x.id!=d.dataset.id);save()}});
+$('addTask').onclick=()=>{const text=$('taskInput').value.trim();if(!text)return;state.tasks.push({id:Date.now(),text,done:false});$('taskInput').value='';save()};
+$('taskInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('addTask').click()});
+$('addHabit').onclick=()=>{const text=$('habitInput').value.trim();if(!text)return;state.habits.push({id:Date.now(),text,done:false});$('habitInput').value='';save()};
+$('habitInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('addHabit').click()});
+$('addTx').onclick=()=>{const amount=Number($('txAmount').value),category=$('txCategory').value.trim();if(!(amount>0)||!category){alert('Wpisz poprawną kwotę i kategorię.');return}state.transactions.push({id:Date.now(),type:$('txType').value,amount,category,note:$('txNote').value.trim(),date:todayKey()});$('txAmount').value='';$('txCategory').value='';$('txNote').value='';save()};
+function command(raw){const s=raw.trim();if(!s)return 'Wpisz polecenie.';let m=s.match(/dodaj zadanie\s*:\s*(.+)/i);if(m){state.tasks.push({id:Date.now(),text:m[1],done:false});save();return 'Dodano zadanie: '+m[1]}m=s.match(/dodaj wydatek\s+(\d+(?:[.,]\d{1,2})?)\s*zł\s+(.+)/i);if(m){state.transactions.push({id:Date.now(),type:'expense',amount:Number(m[1].replace(',','.')),category:m[2].trim(),note:'Dodano przez asystenta',date:todayKey()});save();return `Dodano wydatek ${m[1]} zł — ${m[2]}.`}if(/pokaż moje zadania/i.test(s))return state.tasks.length?'Twoje zadania: '+state.tasks.map(t=>(t.done?'wykonane: ':'do zrobienia: ')+t.text).join('; '):'Nie masz jeszcze zadań.';return 'Nie rozpoznaję jeszcze tego polecenia. Spróbuj: „Dodaj zadanie: zrobić trening” albo „Dodaj wydatek 25 zł jedzenie”.'}
+$('runAssistant').onclick=()=>{$('assistantReply').textContent=command($('assistantInput').value);$('assistantInput').value=''};
+$('assistantInput').addEventListener('keydown',e=>{if(e.key==='Enter')$('runAssistant').click()});
+$('voiceBtn').onclick=()=>{const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){$('assistantReply').textContent='Ta przeglądarka nie udostępnia rozpoznawania mowy. Użyj wpisywania tekstu lub otwórz aplikację w obsługiwanej przeglądarce.';return}const rec=new SR();rec.lang='pl-PL';rec.interimResults=false;rec.onresult=e=>{const phrase=e.results[0][0].transcript;$('assistantInput').value=phrase;$('assistantReply').textContent=command(phrase)};rec.onerror=()=>{$('assistantReply').textContent='Nie udało się rozpoznać mowy. Sprawdź uprawnienia mikrofonu lub wpisz polecenie.'};rec.start()};
+$('resetBtn').onclick=()=>{if(confirm('Przywrócić dane demonstracyjne? Obecne lokalne dane zostaną zastąpione.')){state=initial();save()}};
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+render();
+</script>
+</body>
+</html>
